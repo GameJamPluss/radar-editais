@@ -1,4 +1,4 @@
-import { all, EditalRow } from "@/lib/db";
+import { all, EditalRow, ORDEM_POR_PRAZO } from "@/lib/db";
 import { EditalCard, STATUS_META } from "@/components/ui";
 import { ScanButton } from "@/components/scan-button";
 import Link from "next/link";
@@ -22,7 +22,10 @@ export default async function EditaisPage({
     sqlText += " AND (nome ILIKE ? OR orgao ILIKE ? OR descricao ILIKE ?)";
     params.push(`%${q}%`, `%${q}%`, `%${q}%`);
   }
-  sqlText += " ORDER BY score DESC NULLS LAST, fim_inscricoes::date ASC LIMIT 200";
+  // Ordem por prazo de inscrição: abertos primeiro (do mais próximo ao mais
+  // distante), depois os sem prazo informado e, por último, os já encerrados
+  // (do que fechou mais recentemente para o mais antigo). Empate → maior score.
+  sqlText += ORDEM_POR_PRAZO + " LIMIT 200";
   const editais = await all<EditalRow>(sqlText, params);
 
   const counts = await all<{ status: string; c: number }>(

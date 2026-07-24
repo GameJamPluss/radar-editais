@@ -21,6 +21,24 @@ export async function setConfig(chave: string, valor: string): Promise<void> {
   );
 }
 
+// Ordenação padrão da listagem de editais: pelo prazo de inscrição.
+// 1) abertos (prazo hoje ou à frente), do mais próximo ao mais distante;
+// 2) sem prazo informado; 3) encerrados, do que fechou mais recentemente
+// para o mais antigo. Empate dentro do grupo → maior score primeiro.
+// NULLIF(...,'') protege contra prazo vazio no cast para date.
+export const ORDEM_POR_PRAZO = `
+  ORDER BY
+    CASE
+      WHEN NULLIF(fim_inscricoes, '') IS NULL THEN 1
+      WHEN NULLIF(fim_inscricoes, '')::date >= CURRENT_DATE THEN 0
+      ELSE 2
+    END ASC,
+    CASE WHEN NULLIF(fim_inscricoes, '')::date >= CURRENT_DATE
+         THEN NULLIF(fim_inscricoes, '')::date END ASC NULLS LAST,
+    CASE WHEN NULLIF(fim_inscricoes, '')::date <  CURRENT_DATE
+         THEN NULLIF(fim_inscricoes, '')::date END DESC NULLS LAST,
+    score DESC NULLS LAST`;
+
 export interface EditalRow {
   id: number;
   fonte: string;

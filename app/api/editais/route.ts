@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { all } from "@/lib/db";
+import { all, ORDEM_POR_PRAZO } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -16,7 +16,8 @@ export async function GET(req: NextRequest) {
     sqlText += " AND (nome ILIKE ? OR orgao ILIKE ?)";
     params.push(`%${q}%`, `%${q}%`);
   }
-  sqlText += " ORDER BY score DESC NULLS LAST, fim_inscricoes ASC LIMIT 200";
+  // mesma ordem por prazo da tela /editais (ver ORDEM_POR_PRAZO)
+  sqlText += ORDEM_POR_PRAZO + " LIMIT 200";
 
   return NextResponse.json(await all(sqlText, params));
 }

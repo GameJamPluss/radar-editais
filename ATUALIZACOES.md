@@ -15,6 +15,20 @@ o que o outro mudou**.
 
 ---
 
+## 2026-07-23 — Milena — Editais ordenados pelo prazo de inscrição
+**O que mudou:** A aba **📑 Editais** agora lista do prazo de inscrição **mais próximo para o mais
+distante**, em vez de por score. A ordem é: (1) **abertos**, do que fecha primeiro ao que fecha por
+último; (2) os **sem prazo informado**; (3) os **já encerrados**, do que fechou mais recentemente
+para o mais antigo. Empate dentro de cada grupo → maior score primeiro. Criei a constante
+`ORDEM_POR_PRAZO` em `lib/db.ts` e apliquei também em `GET /api/editais`, para tela e API não
+divergirem.
+**Por quê:** Pedido da Milena — na captação o que importa é o que está vencendo primeiro. Ordenar
+puramente por data crescente jogaria os editais já encerrados para o topo, por isso eles vão para o
+fim da lista.
+**Arquivos:** `lib/db.ts` (nova constante `ORDEM_POR_PRAZO`), `app/editais/page.tsx`,
+`app/api/editais/route.ts`
+**Deploy:** automático via push na main
+
 ## 2026-07-08 — Milena — Banco de Textos com 28 projetos catalogados
 **O que mudou:** Criei um novo módulo `lib/banco-textos-projetos/` que cataloga 28 projetos
 submetidos (12 Startup GRID/GJ+, 10 Acelera Indie e 6 Plug and Plus), extraídos de ~200 arquivos
