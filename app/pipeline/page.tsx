@@ -6,6 +6,11 @@ export const dynamic = "force-dynamic";
 
 const COLUNAS = ["radar", "triagem", "match", "com-dependencia", "escrita", "submetido"];
 
+// Na coluna "match" só entram os editais com score ACIMA de 50 — abaixo disso
+// o match costuma ser falso positivo da triagem por palavras-chave. As outras
+// colunas continuam mostrando tudo. Os ocultos seguem em /editais?status=match.
+const SCORE_MIN_MATCH = 50;
+
 export default async function PipelinePage() {
   const editais = await all<EditalRow>(
     `SELECT * FROM editais WHERE status != 'descartado'
@@ -13,7 +18,10 @@ export default async function PipelinePage() {
   );
 
   const porColuna = new Map<string, EditalRow[]>(COLUNAS.map((c) => [c, []]));
-  for (const e of editais) porColuna.get(e.status)?.push(e);
+  for (const e of editais) {
+    if (e.status === "match" && (e.score ?? 0) <= SCORE_MIN_MATCH) continue;
+    porColuna.get(e.status)?.push(e);
+  }
 
   const descartados = (await one<{ c: number }>(
     "SELECT COUNT(*)::int c FROM editais WHERE status = 'descartado'"
@@ -40,6 +48,11 @@ export default async function PipelinePage() {
               <div className="flex items-center justify-between px-1 pb-3">
                 <div className="font-bold text-sm">
                   {meta.emoji} {meta.label}
+                  {col === "match" && (
+                    <span className="ml-1.5 text-[10px] font-normal text-muted">
+                      score &gt; {SCORE_MIN_MATCH}
+                    </span>
+                  )}
                 </div>
                 <span className="text-xs text-muted">{items.length}</span>
               </div>

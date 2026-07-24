@@ -15,6 +15,18 @@ o que o outro mudou**.
 
 ---
 
+## 2026-07-23 — Milena — Pipeline: coluna "match" só com score acima de 50
+**O que mudou:** No **🗂️ Pipeline**, a coluna **🎯 Match** passa a mostrar apenas os editais com
+**score acima de 50**. As colunas **📡 Radar** e **🔍 Triagem** continuam mostrando todos, sem filtro.
+A coluna ganhou a etiqueta "score > 50" no cabeçalho para deixar claro que está filtrada.
+**Por quê:** Pedido da Milena — abaixo de 50 o "match" quase sempre é falso positivo da triagem por
+palavras-chave (ex.: "Arte nas Ruas" 8, "Workshops de circulação artística" 15). Na prática dos 17
+editais em match só 2 passam do corte (RIOFILME jogos 87 e Embratur 55), deixando a coluna confiável.
+**Observação:** nada é apagado nem muda de status — os ocultos continuam acessíveis em
+`/editais?status=match`. O limite fica na constante `SCORE_MIN_MATCH`, fácil de ajustar.
+**Arquivos:** `app/pipeline/page.tsx`
+**Deploy:** automático via push na main
+
 ## 2026-07-23 — Milena — Editais ordenados pelo prazo de inscrição
 **O que mudou:** A aba **📑 Editais** agora lista do prazo de inscrição **mais próximo para o mais
 distante**, em vez de por score. A ordem é: (1) **abertos**, do que fecha primeiro ao que fecha por
