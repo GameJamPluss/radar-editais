@@ -1,9 +1,19 @@
 import { all, EditalRow, ORDEM_POR_PRAZO } from "@/lib/db";
-import { EditalCard, STATUS_META } from "@/components/ui";
+import { EditalCard, EmptyState, PageHeader, STATUS_META, StatusDot } from "@/components/ui";
 import { ScanButton } from "@/components/scan-button";
 import Link from "next/link";
+import { Search, X } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+// Filtro de status em formato de abas: o item ativo ganha superfície e borda.
+function filtroClasse(ativo: boolean): string {
+  const base =
+    "inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full border text-[0.8125rem] font-medium whitespace-nowrap transition-colors";
+  return ativo
+    ? `${base} bg-surface border-border-strong text-ink`
+    : `${base} border-transparent text-muted hover:text-ink hover:bg-surface-2`;
+}
 
 export default async function EditaisPage({
   searchParams,
@@ -24,7 +34,7 @@ export default async function EditaisPage({
   }
   // Ordem por prazo de inscrição: abertos primeiro (do mais próximo ao mais
   // distante), depois os sem prazo informado e, por último, os já encerrados
-  // (do que fechou mais recentemente para o mais antigo). Empate → maior score.
+  // (do que fechou mais recentemente para o mais antigo). Empate: maior score.
   sqlText += ORDEM_POR_PRAZO + " LIMIT 200";
   const editais = await all<EditalRow>(sqlText, params);
 
@@ -35,54 +45,98 @@ export default async function EditaisPage({
   const total = counts.reduce((a, s) => a + s.c, 0);
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">📑 Editais</h1>
-          <p className="text-muted mt-1">
-            {editais.length} exibidos · {total} no total
-          </p>
+    <div>
+      <PageHeader
+        title="Editais"
+        description="Tudo o que o radar captou, ordenado pelo prazo de inscrição: abertos primeiro, encerrados por último."
+        actions={<ScanButton />}
+      />
+
+      <div className="space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+          <nav aria-label="Filtrar por status" className="flex flex-wrap items-center gap-1">
+            <Link
+              href="/editais"
+              aria-current={!status ? "page" : undefined}
+              className={filtroClasse(!status)}
+            >
+              Todos
+              <span className="num text-faint">{total}</span>
+            </Link>
+            {Object.entries(STATUS_META).map(([k, v]) => (
+              <Link
+                key={k}
+                href={`/editais?status=${k}`}
+                aria-current={status === k ? "page" : undefined}
+                className={filtroClasse(status === k)}
+              >
+                <StatusDot status={k} />
+                {v.label}
+                <span className="num text-faint">{byStatus[k] ?? 0}</span>
+              </Link>
+            ))}
+          </nav>
+
+          <form action="/editais" role="search" className="relative w-72 max-w-full">
+            {status && <input type="hidden" name="status" value={status} />}
+            <Search
+              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-faint"
+              aria-hidden
+            />
+            <input
+              type="search"
+              name="q"
+              defaultValue={q ?? ""}
+              placeholder="Buscar por nome, órgão ou texto"
+              aria-label="Buscar editais"
+              className="input"
+              style={{ paddingLeft: "2.125rem", height: "2.25rem" }}
+            />
+          </form>
         </div>
-        <ScanButton />
-      </header>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <Link
-          href="/editais"
-          className={`badge ${!status ? "border-fuchsia-400/60 text-fuchsia-200" : "border-border text-muted"}`}
-        >
-          todos ({total})
-        </Link>
-        {Object.entries(STATUS_META).map(([k, v]) => (
-          <Link
-            key={k}
-            href={`/editais?status=${k}`}
-            className={`badge ${status === k ? "border-fuchsia-400/60 text-fuchsia-200" : "border-border text-muted"}`}
-          >
-            {v.emoji} {v.label} ({byStatus[k] ?? 0})
-          </Link>
-        ))}
-        <form className="ml-auto" action="/editais">
-          {status && <input type="hidden" name="status" value={status} />}
-          <input
-            type="search"
-            name="q"
-            defaultValue={q ?? ""}
-            placeholder="buscar por nome, órgão, texto..."
-            className="bg-surface-2 border border-border rounded-lg px-3 py-1.5 text-sm w-72 outline-none focus:border-neon"
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[0.8125rem] text-muted">
+          <div>
+            <span className="num text-ink-2 font-medium">{editais.length}</span> exibidos
+            <span aria-hidden className="mx-1.5 text-border-strong">·</span>
+            <span className="num">{total}</span> no total
+            {q && (
+              <>
+                <span aria-hidden className="mx-1.5 text-border-strong">·</span>
+                busca por <span className="text-ink-2">“{q}”</span>
+              </>
+            )}
+          </div>
+          {q && (
+            <Link
+              href={status ? `/editais?status=${status}` : "/editais"}
+              className="link-quiet"
+            >
+              <X className="w-3.5 h-3.5" aria-hidden />
+              Limpar busca
+            </Link>
+          )}
+        </div>
+
+        {editais.length === 0 ? (
+          <EmptyState
+            title="Nenhum edital encontrado."
+            description="Rode uma varredura para buscar oportunidades novas ou ajuste os filtros acima."
           />
-        </form>
-      </div>
-
-      <div className="space-y-2">
-        {editais.length === 0 && (
-          <div className="card p-10 text-center text-muted">
-            Nenhum edital aqui ainda. Rode uma varredura 📡 ou ajuste os filtros.
+        ) : (
+          <div>
+            <div className="hidden sm:flex items-center gap-4 px-4 pb-2 eyebrow">
+              <span className="w-11 shrink-0 text-center">Score</span>
+              <span className="flex-1">Edital</span>
+              <span>Status · fonte · prazo</span>
+            </div>
+            <div className="space-y-1.5">
+              {editais.map((e) => (
+                <EditalCard key={e.id} e={e} />
+              ))}
+            </div>
           </div>
         )}
-        {editais.map((e) => (
-          <EditalCard key={e.id} e={e} />
-        ))}
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { CircleAlert, LoaderCircle, LogIn, Radar } from "lucide-react";
 
 function LoginForm() {
   const [senha, setSenha] = useState("");
@@ -30,31 +31,58 @@ function LoginForm() {
   }
 
   return (
-    <form onSubmit={entrar} className="card card-glow p-8 w-full max-w-sm space-y-4">
-      <div className="text-center">
-        <div className="text-4xl">🎮</div>
-        <h1 className="text-xl font-extrabold neon-text mt-2">Radar de Editais</h1>
-        <p className="text-sm text-muted">GameJam+ · Indie Hero</p>
+    <form onSubmit={entrar} className="card w-full max-w-[23rem]">
+      <div className="border-b border-border px-7 pb-6 pt-7">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-accent text-surface">
+            <Radar className="h-4 w-4" aria-hidden />
+          </span>
+          <h1 className="text-[0.9375rem] font-semibold tracking-[-0.01em] text-ink">
+            Radar de Editais
+          </h1>
+        </div>
+        <p className="mt-3 text-sm leading-relaxed text-muted">
+          Acesso restrito à equipe GameJam+, Indie Hero e Plug and Plus.
+        </p>
       </div>
-      <input
-        type="password"
-        autoFocus
-        value={senha}
-        onChange={(e) => setSenha(e.target.value)}
-        placeholder="senha de acesso"
-        className="w-full bg-surface-2 border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-neon"
-      />
-      <button type="submit" className="btn btn-primary w-full justify-center" disabled={entrando}>
-        {entrando ? "Entrando..." : "Entrar"}
-      </button>
-      {erro && <div className="text-sm text-rose-400 text-center">❌ {erro}</div>}
+
+      <div className="space-y-4 px-7 py-6">
+        <div>
+          <label htmlFor="senha" className="label">
+            Senha de acesso
+          </label>
+          <input
+            id="senha"
+            type="password"
+            autoFocus
+            autoComplete="current-password"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            aria-invalid={erro ? true : undefined}
+            aria-describedby={erro ? "login-erro" : undefined}
+            className="input"
+          />
+        </div>
+
+        {erro && (
+          <p id="login-erro" role="alert" className="flex items-start gap-1.5 text-sm text-danger">
+            <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+            <span>{erro}</span>
+          </p>
+        )}
+
+        <button type="submit" className="btn btn-primary w-full" disabled={entrando}>
+          {entrando ? <LoaderCircle className="spin" aria-hidden /> : <LogIn aria-hidden />}
+          {entrando ? "Entrando…" : "Entrar"}
+        </button>
+      </div>
     </form>
   );
 }
 
 export default function LoginPage() {
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-4">
+    <div className="flex min-h-[80vh] items-center justify-center">
       <Suspense>
         <LoginForm />
       </Suspense>

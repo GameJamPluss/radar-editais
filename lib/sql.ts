@@ -15,9 +15,11 @@ export function sql() {
   if (_sql) return _sql;
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error("DATABASE_URL ausente (Supabase).");
+  // banco local de desenvolvimento (localhost) não usa SSL; Supabase exige
+  const local = /@(localhost|127\.0\.0\.1)(:\d+)?\//.test(url);
   _sql = postgres(url, {
     prepare: false, // pooler em modo transação
-    ssl: "require",
+    ssl: local ? false : "require",
     max: 5,
     idle_timeout: 20,
   });

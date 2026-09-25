@@ -3,14 +3,14 @@
 // Níveis 2-4 = universo de plataformas que o ecossistema monitora
 // (extraído do Coda GJ+ Editais: "Outras plataformas", "Sebraes",
 // "Solicitações de patrocínios"). Nível 5 = feeds RSS configuráveis.
+// Nível 6 = plataformas com pré-requisito (flag `dependencia`).
 //
-// Sem segredos aqui — apenas nome, link, nível e quem usa. Os logins
+// Sem segredos aqui: apenas nome, link, nível e quem usa. Os logins
 // continuam só no Coda.
 
 export interface NivelFonte {
   nivel: number;
   nome: string;
-  emoji: string;
   descricao: string;
 }
 
@@ -18,44 +18,38 @@ export const NIVEIS_FONTE: NivelFonte[] = [
   {
     nivel: 1,
     nome: "Agregadores (varredura automática)",
-    emoji: "🛰️",
     descricao:
-      "Plataformas que reúnem milhares de editais de todo o país — varridas automaticamente pelo radar.",
+      "Plataformas que reúnem milhares de editais de todo o país, varridas automaticamente pelo radar.",
   },
   {
     nivel: 2,
-    nome: "Fomento federal & internacionalização",
-    emoji: "🇧🇷",
+    nome: "Fomento federal e internacionalização",
     descricao:
       "Agências e programas federais, além de missões e contests internacionais.",
   },
   {
     nivel: 3,
-    nome: "Estaduais, municipais & leis de incentivo",
-    emoji: "🏛️",
+    nome: "Estaduais, municipais e leis de incentivo",
     descricao:
       "Fundações, secretarias e plataformas de leis de incentivo (Rouanet, ISS, ICMS).",
   },
   {
     nivel: 4,
     nome: "Patrocínio corporativo",
-    emoji: "🤝",
     descricao:
-      "Empresas e institutos com editais e patrocínios diretos (incl. leis de incentivo).",
+      "Empresas e institutos com editais e patrocínios diretos, incluindo leis de incentivo.",
   },
   {
     nivel: 5,
-    nome: "Newsletters & feeds (RSS)",
-    emoji: "📰",
+    nome: "Newsletters e feeds RSS",
     descricao:
-      "Fontes configuráveis que entram na varredura automática via RSS/Atom (aba Configurações).",
+      "Fontes configuráveis que entram na varredura automática via RSS ou Atom, na aba Configurações.",
   },
   {
     nivel: 6,
     nome: "Com dependências",
-    emoji: "🔗",
     descricao:
-      "Plataformas/programas com pré-requisito — só dá para captar depois de outra aprovação (ex.: precisar de um projeto já aprovado na Lei de Incentivo/Rouanet antes).",
+      "Plataformas e programas com pré-requisito. Só dá para captar depois de outra aprovação, como ter um projeto já aprovado na Lei de Incentivo (Rouanet).",
   },
 ];
 
@@ -69,24 +63,24 @@ export interface FonteCatalogo {
   fonteSlug?: string; // casa com editais.fonte para contagem ao vivo
   empresas?: string[]; // contas/CNPJs que usam essa plataforma
   descricao?: string;
-  dependencia?: boolean; // tem pré-requisito (ex.: precisa de aprovação em lei de incentivo antes) → Nível 6
+  dependencia?: boolean; // tem pré-requisito (ex.: precisa de aprovação em lei de incentivo antes), vai para o Nível 6
 }
 
 export const FONTES_CATALOGO: FonteCatalogo[] = [
   // ---------- Nível 1: agregador ativo ----------
   {
     slug: "prosas",
-    nome: "Prosas — Central de Editais",
+    nome: "Prosas · Central de Editais",
     url: "https://produtos.prosas.com.br/editais",
     nivel: 1,
     tipo: "Agregador",
     noRadar: true,
     fonteSlug: "prosas",
     descricao:
-      "Maior central de editais do terceiro setor no Brasil (+13 mil oportunidades). Integração via API oficial da Central — busca por keyword e catálogo completo de inscrições abertas.",
+      "Maior central de editais do terceiro setor no Brasil, com mais de 13 mil oportunidades. Integração pela API oficial da Central: busca por palavra-chave e catálogo completo de inscrições abertas.",
   },
 
-  // ---------- Nível 2: federal & internacional ----------
+  // ---------- Nível 2: federal e internacional ----------
   {
     slug: "finep",
     nome: "FINEP",
@@ -95,7 +89,7 @@ export const FONTES_CATALOGO: FonteCatalogo[] = [
     tipo: "Fomento federal",
     noRadar: false,
     empresas: ["plug-and-plus", "acelera-indie"],
-    descricao: "Financiadora de Estudos e Projetos — inovação (programa Mais Inovação Brasil).",
+    descricao: "Financiadora de Estudos e Projetos. Inovação (programa Mais Inovação Brasil).",
   },
   {
     slug: "ancine",
@@ -105,27 +99,27 @@ export const FONTES_CATALOGO: FonteCatalogo[] = [
     tipo: "Audiovisual federal",
     noRadar: false,
     empresas: ["startup-grid"],
-    descricao: "Agência Nacional do Cinema — fomento ao audiovisual.",
+    descricao: "Agência Nacional do Cinema. Fomento ao audiovisual.",
   },
   {
     slug: "apex",
-    nome: "ApexBrasil — Patrocínios",
+    nome: "ApexBrasil · Patrocínios",
     url: "https://crm-apps-patrocinio.apexbrasil.com.br/",
     nivel: 2,
     tipo: "Internacionalização",
     noRadar: false,
     empresas: ["acelera-indie", "startup-grid"],
-    descricao: "Agência de Promoção de Exportações — missões e internacionalização.",
+    descricao: "Agência de Promoção de Exportações. Missões e internacionalização.",
   },
   {
     slug: "sebrae-nacional",
-    nome: "Sebrae (SGF / credenciamento nacional)",
+    nome: "Sebrae (SGF e credenciamento nacional)",
     url: "https://sgf.sebrae.com.br/credenciado/",
     nivel: 2,
-    tipo: "Fomento / credenciamento",
+    tipo: "Fomento e credenciamento",
     noRadar: false,
     empresas: ["startup-grid", "acelera-indie"],
-    descricao: "Sistema de Gestão de Fornecedores + credenciamentos regionais (RS, PE, PR, BA, CE, ES, DF, RJ, SC).",
+    descricao: "Sistema de Gestão de Fornecedores e credenciamentos regionais (RS, PE, PR, BA, CE, ES, DF, RJ, SC).",
   },
   {
     slug: "oei",
@@ -135,7 +129,7 @@ export const FONTES_CATALOGO: FonteCatalogo[] = [
     tipo: "Cooperação internacional",
     noRadar: false,
     empresas: ["acelera-indie"],
-    descricao: "Organização dos Estados Ibero-americanos — editais de educação e cultura.",
+    descricao: "Organização dos Estados Ibero-americanos. Editais de educação e cultura.",
   },
   {
     slug: "micbr",
@@ -149,7 +143,7 @@ export const FONTES_CATALOGO: FonteCatalogo[] = [
   },
   {
     slug: "embratur",
-    nome: "Embratur — Patrocínio",
+    nome: "Embratur · Patrocínio",
     url: "https://patrocinio.embratur.com.br/",
     nivel: 2,
     tipo: "Turismo federal",
@@ -168,7 +162,7 @@ export const FONTES_CATALOGO: FonteCatalogo[] = [
     descricao: "Competição internacional de startups lideradas por mulheres.",
   },
 
-  // ---------- Nível 3: estaduais/municipais & leis de incentivo ----------
+  // ---------- Nível 3: estaduais/municipais e leis de incentivo ----------
   {
     slug: "faperj",
     nome: "FAPERJ",
@@ -181,7 +175,7 @@ export const FONTES_CATALOGO: FonteCatalogo[] = [
   },
   {
     slug: "spcine",
-    nome: "Spcine — Editais",
+    nome: "Spcine · Editais",
     url: "https://spcineeditais.com.br/",
     nivel: 3,
     tipo: "Audiovisual (SP)",
@@ -191,7 +185,7 @@ export const FONTES_CATALOGO: FonteCatalogo[] = [
   },
   {
     slug: "salic",
-    nome: "SALIC — Lei Rouanet",
+    nome: "SALIC · Lei Rouanet",
     url: "https://salic.cultura.gov.br/",
     nivel: 3,
     tipo: "Lei de incentivo (federal)",
@@ -201,7 +195,7 @@ export const FONTES_CATALOGO: FonteCatalogo[] = [
   },
   {
     slug: "promac",
-    nome: "PROMAC — ISS São Paulo",
+    nome: "PROMAC · ISS São Paulo",
     url: "https://smcpromac.prefeitura.sp.gov.br/",
     nivel: 3,
     tipo: "Lei de incentivo (municipal SP)",
@@ -211,7 +205,7 @@ export const FONTES_CATALOGO: FonteCatalogo[] = [
   },
   {
     slug: "brde",
-    nome: "BRDE — Incentivos Fiscais",
+    nome: "BRDE · Incentivos fiscais",
     url: "https://incentivosfiscais.brde.com.br/",
     nivel: 3,
     tipo: "Incentivos (Sul)",
@@ -221,7 +215,7 @@ export const FONTES_CATALOGO: FonteCatalogo[] = [
   },
   {
     slug: "iss-rio",
-    nome: "ISS Rio — Incentivo à Cultura",
+    nome: "ISS Rio · Incentivo à cultura",
     url: "https://carioca.rio/",
     nivel: 3,
     tipo: "Lei de incentivo (municipal RJ)",
@@ -235,17 +229,17 @@ export const FONTES_CATALOGO: FonteCatalogo[] = [
     nome: "Chamada Cultural Vale",
     url: "https://institutoculturalvale.org/solicitacao-de-patrocinios/",
     nivel: 3,
-    tipo: "Lei de incentivo (ICMS/Rouanet)",
+    tipo: "Lei de incentivo (ICMS e Rouanet)",
     noRadar: false,
     empresas: ["startup-grid", "plug-and-plus"],
-    descricao: "Instituto Cultural Vale — Lei Rouanet e Lei do Audiovisual.",
+    descricao: "Instituto Cultural Vale. Lei Rouanet e Lei do Audiovisual.",
     dependencia: true,
   },
 
   // ---------- Nível 4: patrocínio corporativo ----------
   {
     slug: "petrobras",
-    nome: "Petrobras — Patrocínios",
+    nome: "Petrobras · Patrocínios",
     url: "https://petrobras.com.br/sustentabilidade/patrocinios",
     nivel: 4,
     tipo: "Patrocínio corporativo",
@@ -264,7 +258,7 @@ export const FONTES_CATALOGO: FonteCatalogo[] = [
   },
   {
     slug: "sicoob-credip",
-    nome: "Sicoob Credip — Patrocínios e Doações",
+    nome: "Sicoob Credip · Patrocínios e doações",
     url: "https://www.sicoob.com.br/web/sicoobcredip/patrocinios-doacoes",
     nivel: 4,
     tipo: "Patrocínio corporativo",
@@ -298,20 +292,19 @@ export interface FonteResolvida {
   nome: string;
   url: string | null;
   nivel: number | null;
-  emoji: string;
 }
 
 /** Mapeia o campo `editais.fonte` para a plataforma-fonte do catálogo. */
 export function fonteDeEdital(fonte: string | null): FonteResolvida {
   if (fonte === "prosas") {
     const p = FONTES_CATALOGO.find((f) => f.slug === "prosas")!;
-    return { slug: p.slug, nome: "Prosas", url: p.url, nivel: 1, emoji: "🛰️" };
+    return { slug: p.slug, nome: "Prosas", url: p.url, nivel: 1 };
   }
   if (fonte === "rss") {
-    return { slug: "rss", nome: "Feed RSS", url: null, nivel: 5, emoji: "📰" };
+    return { slug: "rss", nome: "Feed RSS", url: null, nivel: 5 };
   }
   if (fonte === "ia") {
-    return { slug: "ia", nome: "Busca IA", url: null, nivel: null, emoji: "🤖" };
+    return { slug: "ia", nome: "Busca IA", url: null, nivel: null };
   }
-  return { slug: "manual", nome: "Manual", url: null, nivel: null, emoji: "✍️" };
+  return { slug: "manual", nome: "Manual", url: null, nivel: null };
 }

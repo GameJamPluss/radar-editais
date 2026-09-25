@@ -1,13 +1,22 @@
 import Link from "next/link";
+import { ArrowRight, ChevronRight, LoaderCircle } from "lucide-react";
 import { all } from "@/lib/db";
-import { PILAR_META, EMPRESA_META, fmtData } from "@/components/ui";
+import {
+  PILAR_META,
+  EMPRESA_META,
+  fmtData,
+  PageHeader,
+  PilarLabel,
+  EmptyState,
+} from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
-const PROP_META: Record<string, { label: string; emoji: string; cor: string }> = {
-  pronta: { label: "Pronta", emoji: "✅", cor: "border-lime-400/50 text-lime-300" },
-  gerando: { label: "Escrevendo…", emoji: "✍️", cor: "border-amber-400/50 text-amber-300" },
-  erro: { label: "Erro", emoji: "❌", cor: "border-rose-400/50 text-rose-300" },
+// `dot` é a cor do ponto de status (variável do tema em app/globals.css).
+const PROP_META: Record<string, { label: string; dot: string }> = {
+  pronta: { label: "Pronta", dot: "var(--color-ok)" },
+  gerando: { label: "Escrevendo", dot: "var(--color-warn)" },
+  erro: { label: "Erro", dot: "var(--color-danger)" },
 };
 
 interface Row {
@@ -23,8 +32,24 @@ interface Row {
   pilar_slug: string | null;
 }
 
-export default async function EscritosPage() {
-  // um card por EDITAL escrito (a proposta mais recente de cada), mais novo primeiro
+function PropostaStatus({ status }: { status: string }) {
+  const pm = PROP_META[status] ?? PROP_META.pronta;
+  return (
+    <span className="inline-flex items-center gap-2 text-[0.8125rem] text-ink-2">
+      {status === "gerando" ? (
+        <LoaderCircle className="w-3.5 h-3.5 spin text-warn" aria-hidden />
+      ) : (
+        <span className="dot" style={{ background: pm.dot }} aria-hidden />
+      )}
+      {pm.label}
+    </span>
+  );
+}
+
+const COLS = "md:grid-cols-[minmax(0,1fr)_11rem_7.5rem_8rem_1rem]";
+
+export default async function PropostasPage() {
+  // uma linha por EDITAL escrito (a proposta mais recente de cada), mais novo primeiro
   const rows = await all<Row>(
     `SELECT DISTINCT ON (e.id)
        p.id, p.status AS proposta_status, p.modo, p.criado_em,
@@ -37,55 +62,91 @@ export default async function EscritosPage() {
 
   const prontas = rows.filter((r) => r.proposta_status === "pronta").length;
 
+  const totalTxt = rows.length === 1 ? "1 edital" : `${rows.length} editais`;
+  const prontasTxt = prontas === 1 ? "1 pronta" : `${prontas} prontas`;
+  const descricao =
+    rows.length === 0
+      ? "Editais com proposta redigida aparecem aqui, com a versão mais recente de cada."
+      : `${totalTxt} com proposta redigida${prontas ? `, ${prontasTxt}` : ""}. Cada linha mostra a versão mais recente.`;
+
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-extrabold tracking-tight">✍️ Editais Escritos</h1>
-        <p className="text-muted mt-1">
-          Todos os editais com proposta redigida — {rows.length} no total
-          {prontas ? ` · ${prontas} pronta(s)` : ""}.
-        </p>
-      </header>
+    <div>
+      <PageHeader title="Propostas" description={descricao} />
 
-      <div className="space-y-2">
-        {rows.length === 0 && (
-          <div className="card p-10 text-center text-muted">
-            Nenhuma proposta escrita ainda. Abra um edital, clique em{" "}
-            <b>✍️ Gerar proposta</b> e ele aparece aqui.
-          </div>
-        )}
-
-        {rows.map((r) => {
-          const pm = PROP_META[r.proposta_status] ?? PROP_META.pronta;
-          const pilar = r.pilar_slug ? PILAR_META[r.pilar_slug] : null;
-          return (
-            <Link
-              key={r.id}
-              href={`/propostas/${r.id}`}
-              className="card p-4 flex items-center gap-4 hover:card-glow transition-shadow"
-            >
-              <div className="text-2xl shrink-0" title={pm.label}>
-                {pm.emoji}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="font-semibold truncate">{r.edital_nome}</div>
-                <div className="text-sm text-muted truncate">
-                  {r.orgao ?? "órgão não informado"}
-                  {pilar ? ` · ${pilar.emoji} ${pilar.label}` : ""}
-                  {r.empresa_slug ? ` · ${EMPRESA_META[r.empresa_slug] ?? r.empresa_slug}` : ""}
-                </div>
-              </div>
-              <div className="flex flex-col items-end gap-1 shrink-0">
-                <span className={`badge ${pm.cor}`}>{pm.label}</span>
-                <div className="text-xs text-muted">
-                  {r.modo ? `via ${r.modo} · ` : ""}
-                  {fmtData(r.criado_em)}
-                </div>
-              </div>
+      {rows.length === 0 ? (
+        <EmptyState
+          title="Nenhuma proposta escrita ainda"
+          description="Abra um edital e use Gerar proposta. O rascunho aparece aqui assim que a escrita começar."
+          action={
+            <Link href="/editais" className="btn btn-secondary">
+              Ver editais
+              <ArrowRight aria-hidden />
             </Link>
-          );
-        })}
-      </div>
+          }
+        />
+      ) : (
+        <div className="card overflow-hidden">
+          <div
+            className={`hidden md:grid ${COLS} gap-x-6 px-5 py-2.5 border-b border-border bg-surface-2 eyebrow`}
+            aria-hidden
+          >
+            <span>Edital</span>
+            <span>Pilar</span>
+            <span>Status</span>
+            <span>Gerada em</span>
+            <span />
+          </div>
+
+          <ul>
+            {rows.map((r) => {
+              const pilar = r.pilar_slug ? PILAR_META[r.pilar_slug] : null;
+              return (
+                <li key={r.id} className="border-b border-border last:border-b-0">
+                  <Link
+                    href={`/propostas/${r.id}`}
+                    className={`group grid grid-cols-[minmax(0,1fr)_auto] ${COLS} items-center gap-x-6 gap-y-1 px-5 py-3.5 transition-colors hover:bg-surface-2`}
+                  >
+                    <div className="min-w-0">
+                      <div className="font-medium text-ink truncate transition-colors group-hover:text-accent">
+                        {r.edital_nome}
+                      </div>
+                      <div className="mt-0.5 text-[0.8125rem] text-muted truncate">
+                        {r.orgao ?? "Órgão não informado"}
+                        {r.empresa_slug && (
+                          <>
+                            <span aria-hidden className="mx-1.5 text-border-strong">
+                              ·
+                            </span>
+                            {EMPRESA_META[r.empresa_slug] ?? r.empresa_slug}
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="hidden md:block min-w-0 truncate text-[0.8125rem] text-ink-2">
+                      {pilar ? <PilarLabel slug={r.pilar_slug} /> : <span className="text-faint">—</span>}
+                    </div>
+
+                    <div>
+                      <PropostaStatus status={r.proposta_status} />
+                    </div>
+
+                    <div className="hidden md:block">
+                      <div className="num text-[0.8125rem] text-ink-2">{fmtData(r.criado_em)}</div>
+                      {r.modo && <div className="mt-0.5 text-xs text-faint">via {r.modo}</div>}
+                    </div>
+
+                    <ChevronRight
+                      className="hidden md:block w-4 h-4 text-faint transition-colors group-hover:text-ink-2"
+                      aria-hidden
+                    />
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

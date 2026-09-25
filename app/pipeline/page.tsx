@@ -1,12 +1,13 @@
 import Link from "next/link";
+import { Archive } from "lucide-react";
 import { all, one, EditalRow } from "@/lib/db";
-import { STATUS_META, ScoreRing, PrazoChip } from "@/components/ui";
+import { STATUS_META, StatusDot, PrazoChip, PageHeader } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
 const COLUNAS = ["radar", "triagem", "match", "com-dependencia", "escrita", "submetido"];
 
-// Na coluna "match" só entram os editais com score ACIMA de 50 — abaixo disso
+// Na coluna "match" só entram os editais com score ACIMA de 50. Abaixo disso
 // o match costuma ser falso positivo da triagem por palavras-chave. As outras
 // colunas continuam mostrando tudo. Os ocultos seguem em /editais?status=match.
 const SCORE_MIN_MATCH = 50;
@@ -28,60 +29,85 @@ export default async function PipelinePage() {
   ))!;
 
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-extrabold tracking-tight">🗂️ Pipeline</h1>
-        <p className="text-muted mt-1">
-          Do radar à submissão — o fluxograma vivo.{" "}
-          <Link href="/editais?status=descartado" className="hover:text-ink underline">
-            {descartados.c} descartado(s)
+    <div>
+      <PageHeader
+        title="Pipeline"
+        description="Do radar à submissão. Em cada etapa, os editais de maior score aparecem primeiro."
+        actions={
+          <Link
+            href="/editais?status=descartado"
+            className="btn btn-secondary"
+            title="Ver editais descartados"
+          >
+            <Archive aria-hidden />
+            Descartados
+            <span className="num text-muted">{descartados.c}</span>
           </Link>
-        </p>
-      </header>
+        }
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-4 items-start">
+      <div className="grid grid-flow-col auto-cols-[minmax(11rem,1fr)] items-start gap-3 overflow-x-auto scrollbar-slim pb-2">
         {COLUNAS.map((col) => {
           const meta = STATUS_META[col];
           const items = porColuna.get(col) ?? [];
           return (
-            <div key={col} className="card p-3 min-h-40">
-              <div className="flex items-center justify-between px-1 pb-3">
-                <div className="font-bold text-sm">
-                  {meta.emoji} {meta.label}
-                  {col === "match" && (
-                    <span className="ml-1.5 text-[10px] font-normal text-muted">
-                      score &gt; {SCORE_MIN_MATCH}
-                    </span>
-                  )}
-                </div>
-                <span className="text-xs text-muted">{items.length}</span>
-              </div>
-              <div className="space-y-2">
+            <section
+              key={col}
+              aria-label={`${meta.label}, ${items.length} editais`}
+              className="flex flex-col min-h-48 max-h-[calc(100vh-15rem)] rounded-[10px] border border-border bg-surface-2"
+            >
+              <header className="flex items-center gap-2 px-3 pt-3 pb-2.5">
+                <StatusDot status={col} />
+                <h2 className="eyebrow shrink-0">{meta.label}</h2>
+                {col === "match" && (
+                  <span
+                    className="tag num h-[1.125rem] px-1.5 text-[0.6875rem] min-w-0"
+                    title={`Só entram editais com score acima de ${SCORE_MIN_MATCH}. Os demais seguem em Editais, filtro Match.`}
+                  >
+                    score &gt; {SCORE_MIN_MATCH}
+                  </span>
+                )}
+                <span className="ml-auto num text-xs font-medium text-muted">
+                  {items.length}
+                </span>
+              </header>
+
+              <div className="flex-1 min-h-0 overflow-y-auto scrollbar-slim px-2 pb-2 space-y-1.5">
                 {items.map((e) => (
                   <Link
                     key={e.id}
                     href={`/editais/${e.id}`}
-                    className="block rounded-xl border border-border bg-surface-2 p-3 hover:border-neon transition-colors"
+                    title={e.nome}
+                    className="block rounded-[7px] border border-border bg-surface px-3 py-2.5 transition-colors hover:border-border-strong"
                   >
-                    <div className="flex items-start gap-2">
-                      <ScoreRing score={e.score} />
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium leading-snug line-clamp-3">
-                          {e.nome}
-                        </div>
-                        <div className="text-[11px] text-muted truncate mt-1">
-                          {e.orgao ?? "—"}
-                        </div>
-                        <PrazoChip fim={e.fim_inscricoes} />
-                      </div>
+                    <div className="text-[0.8125rem] font-medium leading-snug text-ink line-clamp-2">
+                      {e.nome}
+                    </div>
+                    <div className="mt-1 text-xs text-muted truncate">
+                      {e.orgao ?? "Órgão não informado"}
+                    </div>
+                    <div className="mt-2.5 flex items-center justify-between gap-2">
+                      <PrazoChip fim={e.fim_inscricoes} />
+                      <span
+                        className="num text-xs text-faint shrink-0"
+                        title={e.score === null ? "Sem score" : `Score ${e.score} de 100`}
+                      >
+                        {e.score === null ? (
+                          "—"
+                        ) : (
+                          <>
+                            <span className="font-semibold text-ink-2">{e.score}</span>/100
+                          </>
+                        )}
+                      </span>
                     </div>
                   </Link>
                 ))}
                 {items.length === 0 && (
-                  <div className="text-xs text-muted text-center py-6">vazio</div>
+                  <p className="px-1 py-6 text-center text-xs text-faint">Nenhum edital</p>
                 )}
               </div>
-            </div>
+            </section>
           );
         })}
       </div>

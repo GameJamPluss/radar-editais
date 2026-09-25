@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Radar de Editais — GameJam+ & Indie Hero",
+  title: "Radar de Editais · GameJam+, Indie Hero e Plug and Plus",
   description:
     "Monitora, analisa e escreve editais para o ecossistema GameJam+ / Indie Hero / Plug and Plus.",
 };
@@ -31,8 +31,8 @@ export default function RootLayout({
       >
         <div className="flex min-h-screen">
           <Sidebar />
-          <main className="flex-1 px-8 py-8 max-w-[1400px] mx-auto w-full">
-            {children}
+          <main className="flex-1 min-w-0">
+            <div className="px-10 pt-9 pb-16 max-w-[1320px] mx-auto w-full">{children}</div>
           </main>
         </div>
       </body>

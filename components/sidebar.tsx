@@ -2,54 +2,97 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  Building,
+  FileText,
+  Globe,
+  LayoutDashboard,
+  Library,
+  PenLine,
+  Radar,
+  Settings,
+  SquareKanban,
+  type LucideIcon,
+} from "lucide-react";
 
-const LINKS = [
-  { href: "/", label: "Dashboard", icon: "📡" },
-  { href: "/editais", label: "Editais", icon: "📑" },
-  { href: "/pipeline", label: "Pipeline", icon: "🗂️" },
-  { href: "/propostas", label: "Escritos", icon: "✍️" },
-  { href: "/fontes", label: "Fontes", icon: "🌐" },
-  { href: "/banco-textos", label: "Banco de Textos", icon: "📚" },
-  { href: "/empresas", label: "Empresas & CNPJs", icon: "🏢" },
-  { href: "/config", label: "Configurações", icon: "⚙️" },
+const GRUPOS: { titulo: string; links: { href: string; label: string; icon: LucideIcon }[] }[] = [
+  {
+    titulo: "Captação",
+    links: [
+      { href: "/", label: "Visão geral", icon: LayoutDashboard },
+      { href: "/editais", label: "Editais", icon: FileText },
+      { href: "/pipeline", label: "Pipeline", icon: SquareKanban },
+      { href: "/propostas", label: "Propostas", icon: PenLine },
+    ],
+  },
+  {
+    titulo: "Base",
+    links: [
+      { href: "/fontes", label: "Fontes", icon: Globe },
+      { href: "/banco-textos", label: "Banco de textos", icon: Library },
+      { href: "/empresas", label: "Empresas e CNPJs", icon: Building },
+    ],
+  },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  if (pathname === "/login") return null;
+
+  const ativo = (href: string) =>
+    pathname === href || (href !== "/" && pathname.startsWith(href));
+
   return (
-    <aside className="w-64 shrink-0 border-r border-border px-4 py-6 flex flex-col gap-1 sticky top-0 h-screen">
-      <div className="px-3 pb-6">
-        <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-fuchsia-600 to-violet-600 flex items-center justify-center text-xl radar-ping">
-            🎮
+    <aside className="w-60 shrink-0 border-r border-border bg-surface px-3 py-5 flex flex-col sticky top-0 h-screen">
+      <Link href="/" className="flex items-center gap-2.5 px-2.5 pb-6">
+        <span className="w-8 h-8 rounded-[7px] bg-accent text-surface flex items-center justify-center">
+          <Radar className="w-[18px] h-[18px]" aria-hidden />
+        </span>
+        <span className="min-w-0">
+          <span className="block text-[0.9375rem] font-semibold leading-tight text-ink">
+            Radar de Editais
+          </span>
+          <span className="block text-[0.6875rem] text-muted leading-tight mt-0.5">
+            GameJam+ · Indie Hero · Plug and Plus
+          </span>
+        </span>
+      </Link>
+
+      <nav className="flex flex-col gap-5" aria-label="Principal">
+        {GRUPOS.map((g) => (
+          <div key={g.titulo} className="flex flex-col gap-0.5">
+            <div className="eyebrow px-2.5 pb-1.5">{g.titulo}</div>
+            {g.links.map((l) => {
+              const Icon = l.icon;
+              const on = ativo(l.href);
+              return (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className={`nav-link ${on ? "active" : ""}`}
+                  aria-current={on ? "page" : undefined}
+                >
+                  <Icon aria-hidden />
+                  {l.label}
+                </Link>
+              );
+            })}
           </div>
-          <div>
-            <div className="font-extrabold text-lg leading-tight neon-text">
-              Radar de Editais
-            </div>
-            <div className="text-[11px] text-muted tracking-wider uppercase">
-              GameJam+ · Indie Hero
-            </div>
-          </div>
-        </div>
-      </div>
-      {LINKS.map((l) => (
+        ))}
+      </nav>
+
+      <div className="mt-auto flex flex-col gap-3">
         <Link
-          key={l.href}
-          href={l.href}
-          className={`nav-link ${
-            pathname === l.href ||
-            (l.href !== "/" && pathname.startsWith(l.href))
-              ? "active"
-              : ""
-          }`}
+          href="/config"
+          className={`nav-link ${ativo("/config") ? "active" : ""}`}
+          aria-current={ativo("/config") ? "page" : undefined}
         >
-          <span>{l.icon}</span>
-          {l.label}
+          <Settings aria-hidden />
+          Configurações
         </Link>
-      ))}
-      <div className="mt-auto px-3 text-[11px] text-muted leading-relaxed">
-        Monitoramento <b>semanal</b> + busca sob demanda via Telegram.
+        <p className="px-2.5 text-[0.6875rem] text-muted leading-relaxed">
+          Varredura automática toda segunda às 9h. Busca sob demanda pelo Telegram.
+        </p>
       </div>
     </aside>
   );

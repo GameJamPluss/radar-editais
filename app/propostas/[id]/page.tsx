@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft, CircleAlert, Download, LoaderCircle } from "lucide-react";
 import { one } from "@/lib/db";
-import { fmtData } from "@/components/ui";
+import { fmtData, PageHeader } from "@/components/ui";
 import { BaixarPdf } from "@/components/baixar-pdf";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +23,7 @@ function celulas(line: string): string[] {
 }
 
 function mdParaHtml(md: string): string {
-  // markdown → HTML com suporte a tabelas, títulos, negrito, listas e citações
+  // markdown para HTML com suporte a tabelas, títulos, negrito, listas e citações
   const lines = escHtml(md).split(/\r?\n/);
   const out: string[] = [];
   let para: string[] = [];
@@ -112,69 +113,80 @@ export default async function PropostaPage({
   const gerando = p.status === "gerando";
   const erro = p.status === "erro";
 
+  const descricao = gerando
+    ? `Em redação desde ${fmtData(p.criado_em)}.`
+    : erro
+      ? `Tentativa de ${fmtData(p.criado_em)}. A geração não foi concluída.`
+      : `Gerado via ${p.modo} em ${fmtData(p.criado_em)}. Revise antes de submeter.`;
+
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="max-w-4xl">
       {/* enquanto gera, recarrega a página a cada 5s para mostrar quando ficar pronta */}
       {gerando && <meta httpEquiv="refresh" content="5" />}
 
-      <div className="flex items-center justify-between gap-4">
-        <Link
-          href={`/editais/${p.edital_id}`}
-          className="text-sm text-muted hover:text-ink"
-        >
-          ← voltar para o edital
-        </Link>
-        {!gerando && !erro && (
-          <div className="flex items-center gap-2">
-            <BaixarPdf
-              titulo={p.titulo ?? "Proposta"}
-              html={conteudoHtml}
-              meta={`Rascunho #${p.id} · ${fmtData(p.criado_em)} — revisar antes de submeter`}
-            />
-            <a href={`/api/propostas/${p.id}/docx`} className="btn btn-ghost">
-              ⬇ .docx
-            </a>
-          </div>
-        )}
-      </div>
+      <PageHeader
+        eyebrow={`Rascunho #${p.id}`}
+        title={p.titulo ?? "Proposta"}
+        description={descricao}
+        actions={
+          <>
+            <Link href={`/editais/${p.edital_id}`} className="btn btn-quiet">
+              <ArrowLeft aria-hidden />
+              Voltar ao edital
+            </Link>
+            {!gerando && !erro && (
+              <>
+                <a href={`/api/propostas/${p.id}/docx`} className="btn btn-secondary">
+                  <Download aria-hidden />
+                  Baixar .docx
+                </a>
+                <BaixarPdf
+                  titulo={p.titulo ?? "Proposta"}
+                  html={conteudoHtml}
+                  meta={`Rascunho #${p.id} · ${fmtData(p.criado_em)} · Revisar antes de submeter`}
+                />
+              </>
+            )}
+          </>
+        }
+      />
 
       {gerando ? (
-        <div className="card card-glow p-10 text-center space-y-4">
-          <div className="text-5xl animate-pulse">✍️</div>
-          <div className="text-xl font-bold">Escrevendo a proposta...</div>
-          <p className="text-muted text-sm max-w-md mx-auto leading-relaxed">
-            O Claude está moldando o banco de textos ao objeto deste edital.
-            Isso costuma levar de <b>1 a 4 minutos</b> — esta página atualiza
-            sozinha quando ficar pronta. Pode deixar aberta. ☕
-          </p>
-          <div className="text-xs text-muted">
-            Rascunho #{p.id} · {fmtData(p.criado_em)}
+        <div role="status" className="card flex items-start gap-4 px-6 py-6">
+          <LoaderCircle className="w-5 h-5 mt-0.5 shrink-0 spin text-accent" aria-hidden />
+          <div className="min-w-0">
+            <div className="text-sm font-medium text-ink">Escrevendo a proposta</div>
+            <p className="mt-1 text-sm text-muted leading-relaxed max-w-[62ch]">
+              O Claude está moldando o banco de textos ao objeto deste edital. Costuma levar
+              de <span className="font-medium text-ink-2">1 a 4 minutos</span>. Esta página
+              atualiza sozinha quando o rascunho ficar pronto, pode deixar aberta.
+            </p>
           </div>
         </div>
       ) : erro ? (
-        <div className="card p-8 border-rose-400/40">
-          <div className="text-lg font-bold text-rose-300 mb-2">
-            ❌ Falha ao gerar a proposta
+        <div
+          role="alert"
+          className="flex items-start gap-4 rounded-[10px] border border-border bg-danger-soft px-6 py-5"
+        >
+          <CircleAlert className="w-5 h-5 mt-0.5 shrink-0 text-danger" aria-hidden />
+          <div className="min-w-0">
+            <div className="text-sm font-medium text-danger">Falha ao gerar a proposta</div>
+            <p className="mt-1 text-sm text-ink-2 leading-relaxed break-words max-w-[72ch]">
+              {p.conteudo}
+            </p>
+            <Link href={`/editais/${p.edital_id}`} className="btn btn-secondary btn-sm mt-4">
+              <ArrowLeft aria-hidden />
+              Voltar e tentar de novo
+            </Link>
           </div>
-          <p className="text-sm text-muted">{p.conteudo}</p>
-          <Link
-            href={`/editais/${p.edital_id}`}
-            className="btn btn-ghost mt-4 inline-flex"
-          >
-            ← voltar e tentar de novo
-          </Link>
         </div>
       ) : (
-        <div className="card p-8">
-          <div className="text-xs text-muted mb-4">
-            Rascunho #{p.id} · gerado via {p.modo} · {fmtData(p.criado_em)} —
-            revisar antes de submeter
-          </div>
+        <article className="card px-6 py-8 sm:px-12 sm:py-11">
           <div
-            className="prose-edital"
+            className="prose-edital [&>:first-child]:mt-0! [&_hr]:my-6 [&_hr]:border-border"
             dangerouslySetInnerHTML={{ __html: conteudoHtml }}
           />
-        </div>
+        </article>
       )}
     </div>
   );

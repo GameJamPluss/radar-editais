@@ -15,6 +15,29 @@ o que o outro mudou**.
 
 ---
 
+## 2026-09-25 — Igor (via Claude) — Redesign visual: tema claro e sóbrio, sem emojis
+**O que mudou:** Todo o app ganhou um visual novo, de ferramenta interna profissional: tema claro com
+neutros quentes, uma única cor de destaque (ameixa, da marca GameJam+), bordas finas no lugar de
+brilho/gradiente neon, e ícones **Lucide** no lugar de todos os emojis (menu, status, pilares, fontes,
+botões e mensagens). Status agora é ponto colorido + texto. Menu reorganizado em "Captação" e "Base"
+("Escritos" virou **Propostas**, "Dashboard" virou **Visão geral**). Todas as páginas usam os mesmos
+primitivos novos em `components/ui.tsx` (`PageHeader`, `SectionHeader`, `Stat`, `EmptyState`,
+`StatusBadge`, `PilarLabel`...). A tela de login ficou sem menu lateral.
+**Correção junto:** prazos no formato "só data" (`2026-09-30`) eram lidos como meia-noite UTC e, no
+Brasil, apareciam um dia antes e como **encerrados no próprio último dia**. Agora todo cálculo de
+data/prazo usa o calendário de São Paulo (`fmtData` / `diasRestantes` em `components/ui.tsx`).
+**Por quê:** Apresentação para a diretoria; o visual anterior (neon + emojis) tinha "cara de SaaS
+feito por IA".
+**Observação:** nenhuma consulta, rota ou regra de negócio mudou. `lib/sql.ts` passou a desligar SSL
+só quando o banco é `localhost` (para pré-visualizar com um Postgres local); em produção segue
+`ssl: require`. Nova dependência: `lucide-react`.
+**Arquivos:** `app/globals.css` (tokens do tema), `components/ui.tsx`, `components/sidebar.tsx`,
+`app/layout.tsx`, todas as páginas em `app/**/page.tsx`, `components/*.tsx`,
+`lib/fontes-catalogo.ts` (sem emoji), `lib/sql.ts`, `package.json`.
+**Deploy:** via `vercel deploy --prod` (o projeto da Vercel ainda está ligado ao repo antigo
+`igorggvet-creator/radar-editais`; push na main do GameJamPluss não publica sozinho. Religar o Git
+na Vercel é o próximo passo)
+
 ## 2026-07-23 — Milena — Pipeline: coluna "match" só com score acima de 50
 **O que mudou:** No **🗂️ Pipeline**, a coluna **🎯 Match** passa a mostrar apenas os editais com
 **score acima de 50**. As colunas **📡 Radar** e **🔍 Triagem** continuam mostrando todos, sem filtro.
