@@ -19,7 +19,8 @@ export const metadata: Metadata = {
     "Monitora, analisa e escreve editais para o ecossistema GameJam+ / Indie Hero / Plug and Plus.",
 };
 
-const SCRIPT_TEMA = `(function(){try{var t=localStorage.getItem("radar-tema");if(t!=="dark"&&t!=="light"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.dataset.theme=t}catch(e){}})()`;
+// tema padrão: escuro. Só fica claro se a pessoa escolheu "Tema claro".
+const SCRIPT_TEMA = `(function(){try{var t=localStorage.getItem("radar-tema");document.documentElement.dataset.theme=t==="light"?"light":"dark"}catch(e){}})()`;
 
 export default function RootLayout({
   children,
@@ -28,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     // o script abaixo define data-theme antes da hidratação
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html lang="pt-BR" data-theme="dark" suppressHydrationWarning>
       <head>
         {/* aplica o tema salvo (ou o do sistema) antes de pintar, sem piscar */}
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA }} />

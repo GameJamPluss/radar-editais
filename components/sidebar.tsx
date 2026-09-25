@@ -29,12 +29,7 @@ function ThemeToggle() {
     try {
       salvo = localStorage.getItem("radar-tema");
     } catch {}
-    const t =
-      salvo === "dark" || salvo === "light"
-        ? salvo
-        : matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light";
+    const t = salvo === "light" ? "light" : "dark"; // padrão: escuro
     document.documentElement.dataset.theme = t;
     setTema(t);
   }, []);

@@ -16,8 +16,8 @@ o que o outro mudou**.
 ---
 
 ## 2026-09-25 — Igor (via Claude) — Tema escuro
-**O que mudou:** Botão **Tema escuro / Tema claro** no rodapé do menu lateral. A escolha fica salva no
-navegador; na primeira visita segue o tema do sistema. Os tokens de cor ganharam uma versão escura
+**O que mudou:** O app abre no **tema escuro por padrão**. O botão **Tema claro / Tema escuro** no
+rodapé do menu lateral troca, e a escolha fica salva no navegador. Os tokens de cor ganharam uma versão escura
 (`:root[data-theme="dark"]` em `app/globals.css`), com destaque e status clareados para manter contraste
 AA. Um script no `<head>` aplica o tema antes de pintar (sem piscar).
 **Por quê:** Pedido do Igor para a apresentação.
