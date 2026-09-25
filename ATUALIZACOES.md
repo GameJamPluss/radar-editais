@@ -15,6 +15,15 @@ o que o outro mudou**.
 
 ---
 
+## 2026-09-25 — Igor (via Claude) — Tema escuro
+**O que mudou:** Botão **Tema escuro / Tema claro** no rodapé do menu lateral. A escolha fica salva no
+navegador; na primeira visita segue o tema do sistema. Os tokens de cor ganharam uma versão escura
+(`:root[data-theme="dark"]` em `app/globals.css`), com destaque e status clareados para manter contraste
+AA. Um script no `<head>` aplica o tema antes de pintar (sem piscar).
+**Por quê:** Pedido do Igor para a apresentação.
+**Arquivos:** `app/globals.css`, `app/layout.tsx`, `components/sidebar.tsx`
+**Deploy:** via `vercel deploy --prod`
+
 ## 2026-09-25 — Igor (via Claude) — Redesign visual: tema claro e sóbrio, sem emojis
 **O que mudou:** Todo o app ganhou um visual novo, de ferramenta interna profissional: tema claro com
 neutros quentes, uma única cor de destaque (ameixa, da marca GameJam+), bordas finas no lugar de

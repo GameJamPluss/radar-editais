@@ -21,6 +21,9 @@
   --color-accent: #4a2f85;
   --color-accent-hover: #3b2470;
   --color-accent-soft: #efeaf7;
+  --color-accent-active: #2f1c5c;
+  --color-surface-hover: #ffffff;
+  --color-stripe: rgba(27, 26, 23, 0.015);
 
   --color-info: #2b64a0;
   --color-ok: #2c7552;
@@ -51,6 +54,51 @@
 
 :root {
   color-scheme: light;
+}
+
+/* Tema escuro: mesmos nomes de token, valores reequilibrados (superfícies
+   mais claras = elevação; destaque e status clareados para contraste AA).
+   Ativado por data-theme="dark" no <html> (script em app/layout.tsx). */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #131211;
+  --color-surface: #1a1918;
+  --color-surface-2: #232220;
+  --color-surface-hover: #1f1e1c;
+  --color-border: #2f2d2a;
+  --color-border-strong: #423f3a;
+
+  --color-ink: #ecebe6;
+  --color-ink-2: #c3c0b8;
+  --color-muted: #9b978e;
+  --color-faint: #7c786f;
+
+  --color-accent: #b29ce6;
+  --color-accent-hover: #c4b3ef;
+  --color-accent-active: #a28ade;
+  --color-accent-soft: #2a2438;
+
+  --color-info: #80b2e8;
+  --color-ok: #6fc79d;
+  --color-warn: #dcb25c;
+  --color-danger: #f08c7e;
+  --color-orange: #e89b6b;
+
+  --color-info-soft: #1c2633;
+  --color-ok-soft: #1a2a22;
+  --color-warn-soft: #2d2618;
+  --color-danger-soft: #33201d;
+  --color-orange-soft: #31231a;
+
+  --color-stripe: rgba(255, 255, 255, 0.02);
+
+  --color-neon: #b29ce6;
+  --color-neon-2: #b29ce6;
+  --color-cyan: #80b2e8;
+  --color-lime: #6fc79d;
+  --color-amber: #dcb25c;
+  --color-rose: #f08c7e;
 }
 
 @layer base {
@@ -92,7 +140,7 @@
   a.card:hover,
   .card-link:hover {
     border-color: var(--color-border-strong);
-    background: #ffffff;
+    background: var(--color-surface-hover);
   }
 
   /* legado: antes era um brilho neon; agora só reforça a borda */
@@ -161,7 +209,7 @@
     background: var(--color-accent-hover);
   }
   .btn-primary:active:not(:disabled) {
-    background: #2f1c5c;
+    background: var(--color-accent-active);
   }
 
   /* secundário: contorno neutro */
@@ -365,5 +413,5 @@
   .prose-edital table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.875rem; }
   .prose-edital th, .prose-edital td { border: 1px solid var(--color-border); padding: 0.5rem 0.75rem; text-align: left; vertical-align: top; line-height: 1.5; }
   .prose-edital th { background: var(--color-surface-2); color: var(--color-ink); font-weight: 600; }
-  .prose-edital tbody tr:nth-child(even) { background: rgba(27, 26, 23, 0.015); }
+  .prose-edital tbody tr:nth-child(even) { background: var(--color-stripe); }
 }

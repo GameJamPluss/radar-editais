@@ -2,18 +2,59 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   Building,
   FileText,
   Globe,
   LayoutDashboard,
   Library,
+  Moon,
   PenLine,
   Radar,
   Settings,
   SquareKanban,
+  Sun,
   type LucideIcon,
 } from "lucide-react";
+
+// Alterna data-theme no <html> e lembra a escolha (o script em
+// app/layout.tsx reaplica na próxima visita, antes de pintar).
+function ThemeToggle() {
+  const [tema, setTema] = useState<"light" | "dark" | null>(null);
+  useEffect(() => {
+    // reaplica o tema salvo: se a hidratação cair para render no cliente,
+    // o React recria os atributos do <html> e o data-theme do script se perde
+    let salvo: string | null = null;
+    try {
+      salvo = localStorage.getItem("radar-tema");
+    } catch {}
+    const t =
+      salvo === "dark" || salvo === "light"
+        ? salvo
+        : matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+    document.documentElement.dataset.theme = t;
+    setTema(t);
+  }, []);
+  const escuro = tema === "dark";
+  const alternar = () => {
+    const novo = escuro ? "light" : "dark";
+    document.documentElement.dataset.theme = novo;
+    try {
+      localStorage.setItem("radar-tema", novo);
+    } catch {}
+    setTema(novo);
+  };
+  const Icon = escuro ? Sun : Moon;
+  return (
+    <button type="button" onClick={alternar} className="nav-link w-full text-left" aria-pressed={escuro}>
+      <Icon aria-hidden />
+      {escuro ? "Tema claro" : "Tema escuro"}
+    </button>
+  );
+}
 
 const GRUPOS: { titulo: string; links: { href: string; label: string; icon: LucideIcon }[] }[] = [
   {
@@ -81,7 +122,8 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="mt-auto flex flex-col gap-3">
+      <div className="mt-auto flex flex-col gap-0.5">
+        <ThemeToggle />
         <Link
           href="/config"
           className={`nav-link ${ativo("/config") ? "active" : ""}`}
@@ -90,7 +132,7 @@ export function Sidebar() {
           <Settings aria-hidden />
           Configurações
         </Link>
-        <p className="px-2.5 text-[0.6875rem] text-muted leading-relaxed">
+        <p className="px-2.5 pt-3 text-[0.6875rem] text-muted leading-relaxed">
           Varredura automática toda segunda às 9h. Busca sob demanda pelo Telegram.
         </p>
       </div>
